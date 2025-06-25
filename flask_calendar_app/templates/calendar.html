@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Calendar Events</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        ul { list-style: none; padding: 0; }
+        li { background-color: #f9f9f9; border: 1px solid #ddd; margin-bottom: 10px; padding: 15px; border-radius: 4px; }
+        li:hover { background-color: #f1f1f1; }
+        .event-summary { font-weight: bold; font-size: 1.1em; color: #0056b3; }
+        .event-time { font-size: 0.9em; color: #555; margin-top: 5px; }
+        .no-events { color: #777; font-style: italic; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .back-link { margin-top: 20px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <h1>Upcoming Google Calendar Events</h1>
+    <p><a href="{{ url_for('index') }}">Back to Home</a> | <a href="{{ url_for('logout') }}">Logout</a></p>
+
+    {% if events_data %}
+        <ul>
+            {% for event_item in events_data %}
+                <li>
+                    <div class="event-summary">
+                        <a href="{{ url_for('response_list_view', event_id=event_item.id) }}">{{ event_item.summary }}</a>
+                        {% if event_item.htmlLink %}
+                            (<a href="{{ event_item.htmlLink }}" target="_blank" title="View on Google Calendar">GCal</a>)
+                        {% endif %}
+                    </div>
+                    {% if event_item.start.dateTime %}
+                        <div class="event-time">
+                            Start: {{ event_item.start.dateTime | datetimeformat }}
+                        </div>
+                    {% elif event_item.start.date %}
+                        <div class="event-time">
+                            Date: {{ event_item.start.date }} (All day)
+                        </div>
+                    {% endif %}
+                    {% if event_item.end.dateTime %}
+                        <div class="event-time">
+                            End: {{ event_item.end.dateTime | datetimeformat }}
+                        </div>
+                    {% elif event_item.end.date %}
+                         <div class="event-time">
+                            End Date: {{ event_item.end.date }} (All day)
+                        </div>
+                    {% endif %}
+                    <div class="event-stats">
+                        Total Responses: {{ event_item.total_responses }} |
+                        Attending: {{ event_item.attending_count }} |
+                        Tentative: {{ event_item.tentative_count }}
+                    </div>
+                    <p><a href="{{ url_for('response_list_view', event_id=event_item.id) }}">View Responses / Respond</a></p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="no-events">No upcoming events found.</p>
+    {% endif %}
+    <p class="back-link"><a href="{{ url_for('index') }}">Back to Home</a></p>
+</body>
+</html>

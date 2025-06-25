@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Responses - {{ event_summary }}</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+        h1 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+        h2 { color: #555; }
+        ul { list-style: none; padding: 0; }
+        li.response-item { background-color: #fff; border: 1px solid #ddd; margin-bottom: 10px; padding: 15px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .response-author { font-weight: bold; color: #0056b3; }
+        .response-status { font-style: italic; color: #28a745; margin-left: 10px; }
+        .response-status.declined { color: #dc3545; }
+        .response-status.tentative { color: #ffc107; }
+        .response-comment { margin-top: 8px; white-space: pre-wrap; word-wrap: break-word; }
+        .response-time { font-size: 0.8em; color: #777; margin-top: 5px; text-align: right; }
+        .no-responses { color: #777; font-style: italic; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .action-links a { margin-right: 15px; background-color: #007bff; color: white; padding: 8px 15px; border-radius: 4px; text-decoration: none; }
+        .action-links a:hover { background-color: #0056b3; }
+        .nav-links { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="nav-links">
+        <a href="{{ url_for('calendar_view') }}">Back to Calendar</a> |
+        <a href="{{ url_for('index') }}">Home</a> |
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+
+    <h1>Responses for: {{ event_summary }}</h1>
+
+    <div class="action-links">
+        <a href="{{ url_for('response_form_view', event_id=event_id) }}">Post/Update Your Response</a>
+    </div>
+
+    <h2>Current Responses:</h2>
+    {% if responses %}
+        <ul>
+            {% for response in responses %}
+                <li class="response-item">
+                    <div class="response-author">{{ response.user.name }} ({{ response.user.email }})</div>
+                    <span class="response-status
+                        {% if response.status == 'declined' %}declined
+                        {% elif response.status == 'tentative' %}tentative
+                        {% endif %}">
+                        - {{ STATUS_CHOICES.get(response.status, response.status) }}
+                    </span>
+                    {% if response.comment %}
+                        <div class="response-comment">{{ response.comment }}</div>
+                    {% endif %}
+                    <div class="response-time">Last updated: {{ response.updated_at | datetimeformat('%Y-%m-%d %H:%M:%S') }}</div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="no-responses">No responses yet for this event.</p>
+    {% endif %}
+
+</body>
+</html>
