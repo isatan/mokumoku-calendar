@@ -9,6 +9,15 @@ from googleapiclient.discovery import build
 
 import datetime # datetimeをインポート
 
+# Helper function to convert credentials to a dictionary
+def credentials_to_dict(credentials):
+   return {'token': credentials.token,
+           'refresh_token': credentials.refresh_token,
+           'token_uri': credentials.token_uri,
+           'client_id': credentials.client_id,
+           'client_secret': credentials.client_secret,
+           'scopes': credentials.scopes}
+
 # .envファイルから環境変数を読み込む
 load_dotenv()
 
@@ -27,7 +36,7 @@ GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
 # ローカル開発用に http を許可 (本番環境では https にしてください)
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-REDIRECT_URI = 'http://localhost:5000/callback' # Googleからのリダイレクト先
+REDIRECT_URI = 'http://127.0.0.1:5000/callback' # Googleからのリダイレクト先
 
 # ユーザーモデル (仮実装、後で詳細を定義)
 class User(UserMixin, db.Model):
@@ -310,12 +319,3 @@ if __name__ == '__main__':
     with app.app_context(): # アプリケーションコンテキスト内でテーブル作成
         db.create_all() # 開発中は毎回テーブルを再作成する (本番ではマイグレーションツールを使用)
     app.run(debug=True, port=5000)
-
-# Helper function to convert credentials to a dictionary
-def credentials_to_dict(credentials):
-   return {'token': credentials.token,
-           'refresh_token': credentials.refresh_token,
-           'token_uri': credentials.token_uri,
-           'client_id': credentials.client_id,
-           'client_secret': credentials.client_secret,
-           'scopes': credentials.scopes}
