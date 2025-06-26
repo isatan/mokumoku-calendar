@@ -176,25 +176,30 @@ def calendar_view():
         # ここでは簡略化のためログインページにリダイレクト
         return redirect(url_for('login'))
 
-# Jinja2カスタムフィルタ: ISO日時文字列をフォーマット
-def format_datetime_filter(value, format='%Y-%m-%d %H:%M'):
+# Jinja2カスタムフィルタ: ISO日時文字列またはdatetimeオブジェクトをフォーマット
+def format_datetime_filter(value, format_str='%Y-%m-%d %H:%M'): # format引数名を変更
     if not value:
         return ""
-    try:
-        # Google Calendar APIはRFC3339形式で日時を返すことが多い
-        # fromisoformatはISO 8601の多くを扱えるが、末尾の 'Z' の扱いがバージョンで異なる場合がある
-        if value.endswith('Z'):
-            # 'Z' を '+00:00' に置換してタイムゾーン情報を明示的にする
-            dt_obj = datetime.datetime.fromisoformat(value.replace('Z', '+00:00'))
-        else:
-            dt_obj = datetime.datetime.fromisoformat(value)
 
-        # ローカルタイムゾーンに変換したい場合は、ここで変換処理を入れる (例: pytzライブラリ使用)
-        # ここではUTCまたはオフセット付きの時刻をそのままフォーマットする
-        return dt_obj.strftime(format)
-    except ValueError:
-        # パースに失敗した場合、元の値をそのまま返すか、エラーを示す文字列を返す
-        return value # または "Invalid date format"
+    if isinstance(value, datetime.datetime):
+        # 既にdatetimeオブジェクトの場合
+        dt_obj = value
+    elif isinstance(value, str):
+        # 文字列の場合、パースを試みる
+        try:
+            if value.endswith('Z'):
+                dt_obj = datetime.datetime.fromisoformat(value.replace('Z', '+00:00'))
+            else:
+                dt_obj = datetime.datetime.fromisoformat(value)
+        except ValueError:
+            return value # パース失敗時は元の値を返す
+    else:
+        # datetimeでも文字列でもない場合はそのまま返す
+        return value
+
+    # ローカルタイムゾーンに変換したい場合は、ここで変換処理を入れる (例: pytzライブラリ使用)
+    # ここではUTCまたはオフセット付きの時刻をそのままフォーマットする
+    return dt_obj.strftime(format_str)
 
 app.jinja_env.filters['datetimeformat'] = format_datetime_filter
 
